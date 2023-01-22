@@ -1,0 +1,25 @@
+
+setState WWWW BBBB RRRR GGGG OOOO YYYY
+- --- set state
+printState
+move L'
+- --- move L'
+printState
+randomizeState 1000
+- --- random State
+printState
+- --- solve with Beam(100)
+solveBeam 100
+- --- solve with Astar
+solveAstar
+- --- increase max nodes
+maxNodes 2000000
+- --- solve with Astar
+solveAstar
+setState YYBW BGOO RYGG OBRG RROW WYWB
+- --- example given
+printState
+- --- solve with Beam(1000)
+solveBeam 1000 
+- --- visually solve it
+visuallySolve
