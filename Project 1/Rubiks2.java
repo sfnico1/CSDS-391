@@ -68,7 +68,7 @@ public class Rubiks2{
           visuallySolve();
         } else writer.write(scanner.nextLine());
         input.delete(0, input.capacity());
-      }
+      } 
       scanner.close();
       writer.close();
     } catch (FileNotFoundException e) {
