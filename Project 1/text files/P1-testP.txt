@@ -1,0 +1,26 @@
+
+maxNodes 20000
+setState 1b2 345 678
+solveAstar
+setState 1b2 345 678
+solveAstar
+setState 1b2 345 678
+solveBeam 10
+setState 125 348 67b
+solveAstar
+setState 125 348 67b
+solveAstar
+setState 125 348 67b
+solveAstar
+setState 412 753 86b
+solveAstar
+setState 412 753 86b
+solveAstar
+setState 412 753 86b
+solveBeam 100
+setState 74b 286 315
+solveAstar
+setState 74b 286 315
+solveAstar
+setState 74b 286 315
+solveBeam 100
