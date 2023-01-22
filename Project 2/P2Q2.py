@@ -3,61 +3,83 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from sklearn import svm, datasets
-from sklearn.inspection import DecisionBoundaryDisplay
-import tensorflow as tf
-from tensorflow import keras
 
-# finding different boundaries
-def diffBoundaries(sepalL, sepalW, petalL, petalW, choice = False):
-    iris = datasets.load_iris()
-    data = np.concatenate(([petalL], [petalW])).T
-    if choice == True:
-        data = np.concatenate(([sepalL], [sepalW])).T
-
-    models = [svm.SVC(kernel="linear"), svm.SVC(kernel="rbf", gamma=1), svm.SVC(kernel="poly", degree=5, gamma=3)]
-    titles = ["Linear","RBF (gamma = 1)","Polynomial (5th Degree, gamma = 3)"]
-
-    for i in range(3):
-        DecisionBoundaryDisplay.from_estimator(models[i].fit(data, iris.target),data,cmap=mpl.cm.jet,response_method="predict")
-        if choice == False:
-            plt.scatter(petalL[0:49], petalW[0:49], color='red', label='Setosa')
-            plt.scatter(petalL[50:100], petalW[50:100], color='green', label='Versicolor')
-            plt.scatter(petalL[101:150], petalW[101:150], color='blue', label='Virginica')
-            plt.ylabel("Petal Width (cm)")
-            plt.xlabel("Petal Length (cm)")
-        else: 
-            plt.scatter(sepalL[0:49], sepalW[0:49], color='red', label='Setosa')
-            plt.scatter(sepalL[50:100], sepalW[50:100], color='green', label='Versicolor')
-            plt.scatter(sepalL[101:150], sepalW[101:150], color='blue', label='Virginica')
-            plt.ylabel("Sepal Width (cm)")
-            plt.xlabel("Sepal Length (cm)")
-        plt.legend()
-        plt.title(titles[i])
+# plotting the data with or without the decision line
+def plotData(petalL, petalW, weights,line = True):
+    fig = plt.figure()
+    data = fig.add_subplot(1, 1, 1)
+    plt.title("Iris Data for Class 2 and 3")
+    plt.ylabel("Petal Width (cm)")
+    plt.xlabel("Petal Length (cm)")
+    plt.xlim(2, 8)
+    plt.ylim(0.75, 2.75)
+    data.scatter(petalL[50:100], petalW[50:100], color='green', label='Versicolor')
+    data.scatter(petalL[101:150], petalW[101:150], color='blue', label='Virginica')
+    if line:
+        x1 = np.linspace(2, 8, 100)
+        x2 = []
+        for i in x1:
+            x2.append(-(weights[0]/weights[1])*i+(weights[2]/weights[1]))
+        plt.plot(x1, x2, color='black')
+    plt.legend()
     plt.show()
-    
-# testing different stepsizes
-def testStepSize(sepalL, sepalW, petalL, petalW, stepSize):
-    fullData = np.concatenate(([sepalL], [sepalW], [petalL], [petalW])).T
-    Y = []
-    temp = np.array([1, 0, 0])
-    for i in range(150):
-        Y.append(temp)
-        if i == 50:
-            temp = np.array([0, 1, 0])
-        if i == 100:
-            temp = np.array([0, 0, 1])
-    Y = np.asarray(Y)
-    
-    model = keras.models.Sequential()
-    model.add(keras.Input((fullData[0].size)))
-    model.add(keras.layers.Dense(3, activation='softmax'))
-
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate = stepSize), loss=keras.losses.categorical_crossentropy, metrics=['accuracy'])
-    history = model.fit(fullData, Y, epochs = 250)
-    #print(history.history)
 
 
+# sigmoid function
+def getSigmoid(weights, x1, x2):
+    return 1 / (1 + np.exp(-(weights[0]*x1 + weights[1]*x2) + weights[2]))
 
 
+#3D plots of the weights
+def plot3D(weights):
+    x1 = np.linspace(0, 7.5, 100) 
+    x2 = np.linspace(0, 2.5, 100) 
+    x1, x2 = np.meshgrid(x1, x2)
+    fig, data = plt.subplots(subplot_kw={"projection": "3d"})
+    sigmoid = getSigmoid(weights, x1, x2)
+    data.plot_surface(x1, x2,  sigmoid, cmap=mpl.cm.cividis)
+    data.set_xlim(0, 7.5)
+    data.set_xlabel("Petal Length (cm)")
+    data.set_ylim(0, 2.5)
+    data.set_ylabel("Petal Width (cm)")
+    data.set_zlim(0, 1.0)
+    data.set_zlabel("Sigmoid Value")
+    plt.show()
 
+
+# test the given data points and plotting them
+def testClassifier(petalL, petalW, species, weights):
+    versicolorPL = []
+    versicolorPW = []
+    virginicaPL = []
+    virginicaPW = []
+    index = np.array([50,60,70,80,85,100,105,119,129,134])
+    for i in range(10):
+        estimatedClass = "virginica"
+        sigmoid = getSigmoid(weights, petalL[index[i]], petalW[index[i]])
+        if sigmoid < 0.5:
+            estimatedClass = "versicolor"
+        print("Real Class:", species[index[i]], ", Estimated Class:", estimatedClass, "(",round(sigmoid, 3), ")")
+        if species[index[i]] == 'versicolor':
+            versicolorPL.append(petalL[index[i]])
+            versicolorPW.append(petalW[index[i]])
+        else:
+            virginicaPL.append(petalL[index[i]])
+            virginicaPW.append(petalW[index[i]])
+    x1 = np.linspace(2, 8, 100)
+    x2 = []
+    for i in x1:
+        x2.append(-(weights[0]/weights[1])*i+(weights[2]/weights[1]))
+        
+    fig = plt.figure()
+    data = fig.add_subplot(1, 1, 1)
+    plt.title("10 Data Points")
+    plt.ylabel("Petal Width (cm)")
+    plt.xlabel("Petal Length (cm)")
+    plt.xlim(2, 8)
+    plt.ylim(0.75, 2.75)
+    data.scatter(versicolorPL, versicolorPW, color='green', label='Versicolor')
+    data.scatter(virginicaPL, virginicaPW, color='blue', label='Virginica')
+    plt.plot(x1, x2, color='black')
+    plt.legend()
+    plt.show()
