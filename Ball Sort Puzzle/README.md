@@ -1,0 +1,2 @@
+
+This was a fun personal project of mine. My family enjoys playing a game called "Ball Sort", where the goal is to sort colored balls into groups. We eventually reached some levels where we got stuck and couldn't find the solution. I decided to write a program that implements the A-star searching algorithm to find the solution. It worked and whenever any of us get stuck on a level, I run this program to solve it for us.
